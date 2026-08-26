@@ -15,7 +15,7 @@ Go over syllabus in detail
 
 Intro to slack, github, anaconda and datacamp
 
-## Lab 1.1 (Due Wednesday by midnight):
+## Lab 1.1 (Due Tuesday by midnight):
 1.	Join the class slack (https://join.slack.com/t/scicomp26/shared_invite/zt-476q6unxw-Pf~lI7ZYXlnJGqnnx5qAAQ). Update your username to be your actual name, and add a profile picture.
 1.	Sign up for a github account. Choose your github username wisely. Send Dr. H your github username over slack so you can be added to our course github channel (https://github.com/chsharrison/Sci_comp_F26/)
 1.	Join the class datacamp site: https://www.datacamp.com/groups/shared_links/72d95471a9c2a80bf38c4e2c1fdebc95e1bf5def9e3153197f4535247717d52c. Navigate to the assignments page.
