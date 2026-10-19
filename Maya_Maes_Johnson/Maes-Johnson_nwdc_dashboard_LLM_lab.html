@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuclear Winter Data Commons — Country Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #e05c2d;
+    --accent2: #f0a070;
+    --blue: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --orange: #e05c2d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+  /* HEADER */
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 18px; font-weight: 600; color: var(--text); }
+  .header .subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .header-logo { color: var(--accent); font-size: 22px; margin-right: 12px; }
+  .header-left { display: flex; align-items: center; }
+
+  /* TABS */
+  .tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .tab { padding: 12px 20px; cursor: pointer; color: var(--text2); font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent2); border-bottom-color: var(--accent); font-weight: 500; }
+
+  /* MAIN */
+  .tab-content { display: none; padding: 20px 24px; }
+  .tab-content.active { display: block; }
+
+  /* CONTROLS BAR */
+  .controls { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+  .control-group label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); }
+  select, input[type=text] { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+  select:focus, input:focus { outline: none; border-color: var(--accent); }
+
+  /* SCENARIO CHECKBOXES */
+  .scen-list { display: flex; flex-direction: column; gap: 4px; }
+  .scen-item { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; padding: 2px 0; }
+  .scen-item input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  .scen-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .scen-toggle { font-size: 11px; color: var(--accent2); cursor: pointer; margin-bottom: 4px; text-decoration: underline; }
+
+  /* RANGE SLIDER */
+  .range-group { display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
+  .range-row { display: flex; align-items: center; gap: 8px; }
+  input[type=range] { accent-color: var(--accent); width: 120px; cursor: pointer; }
+  .range-label { font-size: 12px; color: var(--text); min-width: 30px; }
+
+  /* STARVATION CONTROLS */
+  .starv-controls { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; min-width: 220px; }
+  .starv-controls-header { font-size: 12px; cursor: pointer; color: var(--accent2); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .starv-controls-body { margin-top: 10px; display: none; }
+  .starv-controls-body.open { display: block; }
+  .radio-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .radio-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 3px; }
+  .radio-item { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+  .radio-item input[type=radio] { accent-color: var(--accent); cursor: pointer; }
+  .starv-note { font-size: 10px; color: var(--text2); margin-top: 8px; font-style: italic; line-height: 1.4; }
+
+  /* BTN */
+  .btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background 0.2s; }
+  .btn:hover { background: #c04d1f; }
+  .btn-secondary { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+
+  /* CARD */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card h3 { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; }
+  .card .chart-wrap { position: relative; }
+
+  /* STAT CARDS */
+  .stat-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; flex: 1; min-width: 140px; }
+  .stat-card .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; }
+  .stat-card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+  .stat-card .sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .stat-card.danger .value { color: var(--red); }
+  .stat-card.warn .value { color: var(--yellow); }
+  .stat-card.safe .value { color: var(--green); }
+  .stat-card.neutral .value { color: var(--blue); }
+
+  /* COLLAPSIBLE */
+  .collapsible-btn { cursor: pointer; background: none; border: none; color: var(--text2); font-size: 13px; padding: 0; display: flex; align-items: center; gap: 6px; }
+  .collapsible-btn:hover { color: var(--text); }
+  .collapse-content { display: none; margin-top: 8px; }
+  .collapse-content.open { display: block; }
+
+  /* SCENARIO DESCRIPTIONS */
+  .scenario-info { background: var(--bg3); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 8px; }
+  .scenario-info .scen-name { font-weight: 600; font-size: 13px; }
+  .scenario-info .scen-desc { color: var(--text2); font-size: 12px; margin-top: 3px; line-height: 1.5; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: var(--bg3); color: var(--text2); text-align: left; padding: 8px 10px; font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+  .pct-bar { display: flex; align-items: center; gap: 8px; }
+  .pct-bar-inner { height: 6px; border-radius: 3px; min-width: 2px; transition: width 0.3s; }
+  .neg { background: var(--red); }
+  .slight-neg { background: var(--yellow); }
+  .pos { background: var(--green); }
+
+  /* SECTION HEADER */
+  .section-header { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  /* FOOTER */
+  .footer { text-align: center; color: var(--text2); font-size: 11px; padding: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
+  .footer a { color: var(--accent2); text-decoration: none; }
+
+  /* ABOUT TAB */
+  .about-section { max-width: 800px; margin: 0 auto; }
+  .about-section h2 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+  .about-section h3 { font-size: 14px; color: var(--accent2); margin: 20px 0 8px; }
+  .about-section p { color: var(--text2); line-height: 1.7; margin-bottom: 12px; font-size: 13px; }
+  .about-section a { color: var(--accent2); text-decoration: none; }
+  .about-section a:hover { text-decoration: underline; }
+  .about-section hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .about-section .data-link { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; }
+  .about-section .data-link strong { color: var(--text); }
+  .sub-scen-block { background: var(--bg3); border-left: 3px solid var(--blue); padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 10px; }
+  .sub-scen-block h4 { font-size: 12px; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .sub-scen-block ul { list-style: none; padding: 0; }
+  .sub-scen-block ul li { color: var(--text2); font-size: 12px; line-height: 1.6; padding: 2px 0; }
+  .sub-scen-block ul li strong { color: var(--text); }
+
+  /* TECH NOTE */
+  .tech-note { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+  .tech-note strong { color: var(--text); }
+
+  /* CROP SELECT */
+  .crop-select-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; color: var(--text2); }
+  .crop-select-row select { padding: 4px 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-logo">&#9762;</span>
+    <div>
+      <h1>Nuclear Winter Data Commons</h1>
+      <div class="subtitle">Country-Level Climate &amp; Food Security Analysis &mdash; Version 2026-02-13</div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('policy')" id="tabl-policy">&#127758; Policy Dashboard</div>
+  <div class="tab" onclick="switchTab('analyst')" id="tabl-analyst">&#128202; Analyst Dashboard</div>
+  <div class="tab" onclick="switchTab('about')" id="tabl-about">&#8505;&#65039; About</div>
+</div>
+
+<!-- ============================================================ POLICY TAB -->
+<div class="tab-content active" id="tab-policy">
+
+  <div class="controls" id="p-controls">
+    <!-- Country -->
+    <div class="control-group">
+      <label>Country</label>
+      <select id="p-country" onchange="pOnChange()"></select>
+    </div>
+
+    <!-- Scenarios -->
+    <div class="control-group">
+      <label>Scenarios</label>
+      <div class="scen-toggle" onclick="pToggleAll()">&#9745; Select All / &#9744; Deselect All</div>
+      <div class="scen-list" id="p-scen-list"></div>
+    </div>
+
+    <!-- Year range -->
+    <div class="control-group range-group">
+      <label>Years After Conflict: <span id="p-year-label">0 &ndash; 15</span></label>
+      <div class="range-row">
+        <span style="font-size:11px;color:var(--text2)">Start</span>
+        <input type="range" id="p-year-start" min="0" max="20" value="0" oninput="pYearChange()">
+        <span class="range-label" id="p-yr-start-val">0</span>
+      </div>
+      <div class="range-row">
+        <span style="font-size:11px;color:var(--text2)">End</span>
+        <input type="range" id="p-year-end" min="0" max="20" value="15" oninput="pYearChange()">
+        <span class="range-label" id="p-yr-end-val">15</span>
+      </div>
+    </div>
+
+    <!-- Starvation sub-scenarios -->
+    <div class="control-group">
+      <label>Starvation Options</label>
+      <div class="starv-controls">
+        <div class="starv-controls-header" onclick="toggleStarvControls('p-starv-body')">
+          &#9654; Starvation Sub-Scenarios
+        </div>
+        <div class="starv-controls-body" id="p-starv-body">
+          <div class="radio-group">
+            <div class="radio-group-label">Trade Status</div>
+            <label class="radio-item"><input type="radio" name="p-trade" value="trade" checked onchange="renderPolicy()"> With Trade</label>
+            <label class="radio-item"><input type="radio" name="p-trade" value="no trade" onchange="renderPolicy()"> No Trade</label>
+          </div>
+          <div class="radio-group">
+            <div class="radio-group-label">Livestock</div>
+            <label class="radio-item"><input type="radio" name="p-livestock" value="livestock" checked onchange="renderPolicy()"> Livestock</label>
+            <label class="radio-item"><input type="radio" name="p-livestock" value="partial livestock" onchange="renderPolicy()"> Partial Livestock</label>
+            <label class="radio-item"><input type="radio" name="p-livestock" value="no livestock" onchange="renderPolicy()"> No Livestock</label>
+          </div>
+          <div class="radio-group">
+            <div class="radio-group-label">Food Waste Reduction</div>
+            <label class="radio-item"><input type="radio" name="p-waste" value="0% reduction" checked onchange="renderPolicy()"> 0% Reduction</label>
+            <label class="radio-item"><input type="radio" name="p-waste" value="50% reduction" onchange="renderPolicy()"> 50% Reduction</label>
+            <label class="radio-item"><input type="radio" name="p-waste" value="100% reduction" onchange="renderPolicy()"> 100% Reduction</label>
+          </div>
+          <div class="starv-note">See &ldquo;About the Scenarios&rdquo; section below for details on these sub-scenarios.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-row">
+    <div class="stat-card" id="p-stat-temp-card">
+      <div class="label" id="p-stat-temp-label">Temp Change</div>
+      <div class="value" id="p-stat-temp">&#8212;</div>
+      <div class="sub">vs. no-war baseline</div>
+    </div>
+    <div class="stat-card" id="p-stat-precip-card">
+      <div class="label" id="p-stat-precip-label">Precip Change</div>
+      <div class="value" id="p-stat-precip">&#8212;</div>
+      <div class="sub">vs. no-war baseline</div>
+    </div>
+    <div class="stat-card" id="p-stat-starvpct-card">
+      <div class="label" id="p-stat-starvpct-label">% Population Starving (Yr 2)</div>
+      <div class="value" id="p-stat-starvpct">&#8212;</div>
+      <div class="sub">starvation estimate</div>
+    </div>
+    <div class="stat-card" id="p-stat-starvnum-card">
+      <div class="label" id="p-stat-starvnum-label"># Starving (Yr 2)</div>
+      <div class="value" id="p-stat-starvnum">&#8212;</div>
+      <div class="sub">starvation estimate</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 3a: temp + precip -->
+  <div class="grid-2">
+    <div class="card">
+      <h3 id="p-temp-title">Surface Temperature &mdash; Annual Mean (&deg;C)</h3>
+      <div class="chart-wrap"><canvas id="p-temp-chart" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <h3 id="p-precip-title">% Change in Precipitation vs. Baseline</h3>
+      <div class="chart-wrap"><canvas id="p-precip-chart" height="220"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 3b: starvation bar full width -->
+  <div class="grid-1">
+    <div class="card">
+      <h3 id="p-starv-title">Population Starving (%) by Scenario</h3>
+      <div class="chart-wrap"><canvas id="p-starv-chart" height="360"></canvas></div>
+    </div>
+  </div>
+
+<!-- PRECIPITATION DISTRIBUTION -->
+<div class="grid-1">
+  <div class="card">
+    <h3 id="p-dist-title">How does rainfall change compare with other countries?</h3>
+    <p id="p-dist-summary" style="font-size:15px; line-height:1.6; color:var(--text); margin-bottom:14px"></p>
+    <div class="chart-wrap" style="height:380px">
+      <canvas id="p-dist-chart" role="img" aria-label="Histogram of precipitation change across countries"></canvas>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:18px; margin-top:12px; font-size:13px; color:var(--text2)">
+      <span><span style="display:inline-block;width:14px;height:14px;background:#56B4E9;vertical-align:middle;margin-right:6px"></span>Other countries (bar height = how many countries)</span>
+      <span><span style="display:inline-block;width:3px;height:14px;background:#E69F00;vertical-align:middle;margin-right:8px"></span>Selected country</span>
+      <span><span style="display:inline-block;width:14px;border-top:2px dashed #e6edf3;vertical-align:middle;margin-right:6px"></span>No change</span>
+    </div>
+    <p id="p-dist-note" style="font-size:12px; color:var(--text2); margin-top:10px; line-height:1.5"></p>
+  </div>
+</div>
+
+  <!-- CHARTS ROW 4: crop yield changes + crop over time -->
+  <div class="grid-2">
+    <div class="card">
+      <h3 id="p-cropbar-title">Crop Yield Changes (avg years 1&ndash;10)</h3>
+      <div class="chart-wrap" style="height:320px"><canvas id="p-cropbar-chart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Crop Yield Over Time</h3>
+      <div class="crop-select-row">
+        <span>Crop:</span>
+        <select id="p-crop-select" onchange="renderPolicyCropLine()">
+          <option value="wheat">Wheat</option>
+          <option value="corn">Corn</option>
+          <option value="rice">Rice</option>
+          <option value="soy">Soy</option>
+          <option value="grass">Pasture Grass</option>
+        </select>
+      </div>
+      <div class="chart-wrap"><canvas id="p-cropline-chart" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <!-- COLLAPSIBLE SCENARIO DESCRIPTIONS -->
+  <div class="card" style="margin-bottom:16px">
+    <button class="collapsible-btn" onclick="toggleCollapse('p-scen-desc-content')">
+      &#9654; About the Scenarios
+    </button>
+    <div class="collapse-content" id="p-scen-desc-content">
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px" id="p-scen-desc-list"></div>
+    </div>
+
+  <!-- DATA DOCUMENTATION -->
+  <div class="card" style="margin-bottom:16px">
+    <button class="collapsible-btn" onclick="toggleCollapse('p-data-doc-content')">
+      &#9654; Data Documentation
+    </button>
+    <div class="collapse-content" id="p-data-doc-content">
+      <div style="margin-top:12px; line-height:1.6">
+        
+        <h4 style="color:#8b949e; margin-top:12px">Overview</h4>
+        <p>This dashboard visualizes the impacts of nuclear winter scenarios on global climate, agriculture, and food security. All data are derived from climate model simulations and agricultural impact assessments based on stratospheric soot injection scenarios.</p>
+        
+        <h4 style="color:#8b949e; margin-top:16px">Data Sources</h4>
+        <ul style="margin-left:20px">
+          <li><strong>Temperature & Precipitation:</strong> Climate model outputs from WACCM6 (Whole Atmosphere Community Climate Model version 6) simulations</li>
+          <li><strong>Agriculture:</strong> CLM crop yield projections (wheat, corn, rice, soy, pasture grass) based on climate disruption</li>
+          <li><strong>Fisheries:</strong> Marine catch data from global fishery models under altered ocean conditions</li>
+          <li><strong>Starvation:</strong> Food availability calculations based on Xia et al. (2022) methodology</li>
+        </ul>
+        
+        <h4 style="color:#8b949e; margin-top:16px">Nuclear Winter Scenarios</h4>
+        <p>Scenarios defined by mass of black carbon (soot) injected into stratosphere:</p>
+        <ul style="margin-left:20px">
+          <li><strong>0 Tg:</strong> Control scenario (no nuclear conflict)</li>
+          <li><strong>5, 16, 27, 37, 47 Tg:</strong> India-Pakistan regional conflict scenarios with varying weapon counts and yields</li>
+          <li><strong>150 Tg:</strong> U.S.-Russia superpower conflict scenario (4400 weapons × 100 kt each)</li>
+        </ul>
+        
+        <h4 style="color:#8b949e; margin-top:16px">Starvation Methodology</h4>
+        <p><strong>Source:</strong> Xia, L., Robock, A., Scherrer, K. et al. "Global food insecurity and famine from reduced crop, marine fishery and livestock production due to climate disruption from nuclear war soot injection." <em>Nature Food</em> 3, 586–596 (2022). DOI: 10.1038/s43016-022-00573-0</p>
+        
+        <p><strong>Key Assumptions:</strong></p>
+        <ul style="margin-left:20px">
+          <li>All stored food consumed within months post-war</li>
+          <li>Available food distributed to provide minimum calories for regular physical activity</li>
+          <li>Once food exhausted, no food provided to predicted deaths</li>
+          <li>Three sub-scenario dimensions: Trade (trade vs. no trade), Livestock (livestock/partial/none), Waste reduction (0%, 25%, 50%, 100%)</li>
+        </ul>
+        
+        <p><strong>Outputs:</strong></p>
+        <ul style="margin-left:20px">
+          <li><strong>Percent starving (%):</strong> Percentage of country population unable to obtain minimum caloric requirements</li>
+          <li><strong>Number starving:</strong> Absolute number of people (millions) facing starvation in each scenario</li>
+        </ul>
+        
+        <p style="background:#1c2128; padding:8px; border-left:3px solid #58a6ff; margin-top:8px">
+          <strong>Note:</strong> The specific caloric threshold (kcal/day) used to define "starving" is not specified in publicly accessible sources. Methodology references "minimum number of calories needed to support regular physical activity" but exact values may be country-specific. Consult supplementary materials or contact study authors for precise thresholds.
+        </p>
+        
+        <h4 style="color:#8b949e; margin-top:16px">Data Interpretation Notes</h4>
+        <ul style="margin-left:20px">
+          <li><strong>Years elapsed:</strong> Time since nuclear detonation (year 0 = conflict year, years 1-10 = post-war period)</li>
+          <li><strong>Crop yield changes:</strong> Percent change relative to control (0 Tg) scenario for same time period</li>
+          <li><strong>Missing data:</strong> Some countries/scenarios may have incomplete data due to model limitations or negligible impacts</li>
+          <li><strong>Uncertainties:</strong> All projections subject to model uncertainties, climate variability, and assumptions about post-war human behavior</li>
+        </ul>
+        
+        <h4 style="color:#8b949e; margin-top:16px">Version & Updates</h4>
+        <p>Dashboard version: 2026-02-20 | Data last updated: 2026-01-21 | For questions or corrections, contact study authors.</p>
+        
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+</div>
+
+<!-- ============================================================ ANALYST TAB -->
+<div class="tab-content" id="tab-analyst">
+
+  <div class="controls" id="a-controls">
+    <!-- Country -->
+    <div class="control-group">
+      <label>Country</label>
+      <select id="a-country" onchange="aOnChange()"></select>
+    </div>
+
+    <!-- Scenarios -->
+    <div class="control-group">
+      <label>Scenarios</label>
+      <div class="scen-toggle" onclick="aToggleAll()">&#9745; Select All / &#9744; Deselect All</div>
+      <div class="scen-list" id="a-scen-list"></div>
+    </div>
+
+    <!-- Year range -->
+    <div class="control-group range-group">
+      <label>Years After Conflict: <span id="a-year-label">0 &ndash; 15</span></label>
+      <div class="range-row">
+        <span style="font-size:11px;color:var(--text2)">Start</span>
+        <input type="range" id="a-year-start" min="0" max="20" value="0" oninput="aYearChange()">
+        <span class="range-label" id="a-yr-start-val">0</span>
+      </div>
+      <div class="range-row">
+        <span style="font-size:11px;color:var(--text2)">End</span>
+        <input type="range" id="a-year-end" min="0" max="20" value="15" oninput="aYearChange()">
+        <span class="range-label" id="a-yr-end-val">15</span>
+      </div>
+    </div>
+
+    <!-- Starvation sub-scenarios -->
+    <div class="control-group">
+      <label>Starvation Options</label>
+      <div class="starv-controls">
+        <div class="starv-controls-header" onclick="toggleStarvControls('a-starv-body')">
+          &#9654; Starvation Sub-Scenarios
+        </div>
+        <div class="starv-controls-body" id="a-starv-body">
+          <div class="radio-group">
+            <div class="radio-group-label">Trade Status</div>
+            <label class="radio-item"><input type="radio" name="a-trade" value="trade" checked onchange="renderAnalyst()"> With Trade</label>
+            <label class="radio-item"><input type="radio" name="a-trade" value="no trade" onchange="renderAnalyst()"> No Trade</label>
+          </div>
+          <div class="radio-group">
+            <div class="radio-group-label">Livestock</div>
+            <label class="radio-item"><input type="radio" name="a-livestock" value="livestock" checked onchange="renderAnalyst()"> Livestock</label>
+            <label class="radio-item"><input type="radio" name="a-livestock" value="partial livestock" onchange="renderAnalyst()"> Partial Livestock</label>
+            <label class="radio-item"><input type="radio" name="a-livestock" value="no livestock" onchange="renderAnalyst()"> No Livestock</label>
+          </div>
+          <div class="radio-group">
+            <div class="radio-group-label">Food Waste Reduction</div>
+            <label class="radio-item"><input type="radio" name="a-waste" value="0% reduction" checked onchange="renderAnalyst()"> 0% Reduction</label>
+            <label class="radio-item"><input type="radio" name="a-waste" value="50% reduction" onchange="renderAnalyst()"> 50% Reduction</label>
+            <label class="radio-item"><input type="radio" name="a-waste" value="100% reduction" onchange="renderAnalyst()"> 100% Reduction</label>
+          </div>
+          <div class="starv-note">See &ldquo;About the Scenarios&rdquo; section below for details on these sub-scenarios.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-note">
+    <strong>Data notes:</strong>
+    Temperature data from CESM2-WACCM6 model runs (Toon et al. 2019 for 5&ndash;47 Tg; Coupe et al. for 150 Tg). Agriculture (CLM) from crop models driven by CESM climate output. Starvation estimates from Xia et al. 2022 food modeling. Values shown are country-area-weighted averages. Scenarios represent black carbon (soot) injected into stratosphere; higher values correspond to larger nuclear exchanges.
+  </div>
+
+  <div class="grid-1">
+    <div class="card">
+      <h3>Surface Temperature (&deg;C) &mdash; Annual Mean</h3>
+      <div class="chart-wrap"><canvas id="a-temp-chart" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>% Change in Precipitation vs. Baseline</h3>
+      <div class="chart-wrap"><canvas id="a-precip-chart" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Population Starving (%) by Scenario</h3>
+      <div class="chart-wrap"><canvas id="a-starv-chart" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Wheat Yield Change (%) &mdash; CLM</h3>
+      <div class="chart-wrap"><canvas id="a-wheat-chart" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Corn Yield Change (%) &mdash; CLM</h3>
+      <div class="chart-wrap"><canvas id="a-corn-chart" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Rice Yield Change (%) &mdash; CLM</h3>
+      <div class="chart-wrap"><canvas id="a-rice-chart" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Soy Yield Change (%) &mdash; CLM</h3>
+      <div class="chart-wrap"><canvas id="a-soy-chart" height="200"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Starvation Table -->
+  <div class="card" style="margin-bottom:16px">
+    <h3>Starvation Estimates &mdash; All Sub-Scenarios</h3>
+    <div id="a-starv-table-wrap" style="overflow-x:auto"></div>
+  </div>
+
+  <!-- Scenario descriptions -->
+  <div class="card" style="margin-bottom:16px">
+    <button class="collapsible-btn" onclick="toggleCollapse('a-scen-desc-content')">
+      &#9654; About the Scenarios
+    </button>
+    <div class="collapse-content" id="a-scen-desc-content">
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px" id="a-scen-desc-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ ABOUT TAB -->
+<div class="tab-content" id="tab-about">
+  <div class="about-section">
+    <h2>About the Nuclear Winter Data Commons</h2>
+    <p>This dashboard was built using data from the Nuclear Winter Data Commons (NWDC), a repository of simplified, spreadsheet-ready datasets derived from established Earth System Model simulations. The full data includes variables relevant to both human and environmental impacts of nuclear conflict: temperature, precipitation, ultraviolet radiation, crop yields, fish catch, and sea ice thickness for a range of nuclear conflict scenarios. This repository aims to facilitate interdisciplinary research into the long-term consequences of nuclear detonations.</p>
+    <p>Nuclear winter refers to the suite of physical and biological consequences that may follow nuclear conflict, particularly the cooling and darkening of Earth&rsquo;s surface due to black carbon soot in the upper atmosphere. While the associated changes in temperature, precipitation, and food system productivity have been the subject of climate modeling for decades, the outputs of models used to project these effects are stored in large files with formats unfamiliar to the broader research community. This paper introduces a standardized, user-friendly repository of simulated nuclear conflict climate impact data designed to lower barriers for non-specialist researchers.</p>
+    <div class="data-link">
+      <strong>DATA REPOSITORY:</strong> <a href="https://osf.io/e28gq/overview" target="_blank">https://osf.io/e28gq/overview</a>
+    </div>
+    <div class="data-link">
+      <strong>PREPRINT PAPER:</strong> <a href="https://eartharxiv.org/repository/view/10406/" target="_blank">https://eartharxiv.org/repository/view/10406/</a>
+    </div>
+    <hr>
+    <h3>About the Scenarios</h3>
+    <p>Nuclear Winter scenarios are defined by the quantity of black carbon (soot) injected into the stratosphere by fires ignited during nuclear conflict, measured in teragrams (Tg). More soot = more sunlight blocked = more cooling and agricultural disruption.</p>
+    <div id="about-scen-list"></div>
+    <hr>
+    <h3>Sub-Scenario Dimensions (Starvation Data Only)</h3>
+    <div class="sub-scen-block">
+      <h4>Trade Status</h4>
+      <ul>
+        <li><strong>With Trade:</strong> Countries can import food from regions less affected by nuclear winter.</li>
+        <li><strong>No Trade:</strong> Each country relies only on its own food production &mdash; a worst-case assumption.</li>
+      </ul>
+    </div>
+    <div class="sub-scen-block">
+      <h4>Livestock</h4>
+      <ul>
+        <li><strong>Livestock:</strong> Grain is diverted to maintain livestock herds (less grain available for human consumption).</li>
+        <li><strong>Partial Livestock:</strong> Partial livestock culling; some grain redirected to human food.</li>
+        <li><strong>No Livestock:</strong> All grain previously used for livestock is redirected to human food.</li>
+      </ul>
+    </div>
+    <div class="sub-scen-block">
+      <h4>Food Waste Reduction</h4>
+      <ul>
+        <li><strong>0% Reduction:</strong> No change in food waste behavior.</li>
+        <li><strong>50% Reduction:</strong> Half of normally wasted food is consumed instead.</li>
+        <li><strong>100% Reduction:</strong> All food waste eliminated (theoretical maximum efficiency).</li>
+      </ul>
+    </div>
+    <p style="color:var(--text2);font-size:11px;margin-top:12px;font-style:italic;">Note: The current dataset includes only the &ldquo;0% reduction&rdquo; waste scenario. The 50% and 100% reduction options are reserved for future data releases.</p>
+  </div>
+</div>
+
+<div class="footer">
+  Nuclear Winter Data Commons &mdash; <a href="https://osf.io/e28gq" target="_blank">osf.io/e28gq</a> &mdash; Data v2026-02-13 &mdash; Sources: Toon et al. 2019, Coupe et al. 2019, Xia et al. 2022
+</div>
+
+<script src="nwdc_data.js"></script>
+<script>
+
+// ============================================================
+// CONSTANTS
+// ============================================================
+const SCENARIO_IDS   = [0, 5, 16, 27, 37, 47, 150];
+const SCENARIO_COLORS = {
+  0:   '#a0a8b0',  // neutral gray for control scenario
+  5:   '#FC9D8D',  // light red/salmon
+  16:  '#D86CA1',  // pink
+  27:  '#B43BB5',  // magenta
+  37:  '#900AC9',  // purple
+  47:  '#6C00CD',  // deep purple
+  150: '#3F00D1'   // vibrant purple-blue
+};
+const SCENARIO_LABELS = {
+  0:   '0 Tg \u2014 No war (control)',
+  5:   '5 Tg \u2014 Limited India-Pakistan conflict',
+  16:  '16 Tg \u2014 Large regional conflict',
+  27:  '27 Tg \u2014 Large regional escalation',
+  37:  '37 Tg \u2014 Medium US-Russia exchange',
+  47:  '47 Tg \u2014 Large US-Russia exchange',
+  150: '150 Tg \u2014 Full-scale US-Russia war'
+};
+const SCENARIO_SHORT_LABELS = {
+  0:   '0 Tg',
+  5:   '5 Tg',
+  16:  '16 Tg',
+  27:  '27 Tg',
+  37:  '37 Tg',
+  47:  '47 Tg',
+  150: '150 Tg'
+};
+const SCENARIO_DESC = {
+  0:   'Control scenario: no nuclear conflict. Baseline climate conditions for comparison.',
+  5:   'India and Pakistan conflict. 100 weapons of 15 kt explosive power. Maximum radiation anomaly: -10.9 W/m².',
+  16:  'India and Pakistan conflict. 250 weapons of 15 kt explosive power. Maximum radiation anomaly: -31.1 W/m².',
+  27:  'India and Pakistan conflict. 250 weapons of 50 kt explosive power. Maximum radiation anomaly: -46.9 W/m².',
+  37:  'India and Pakistan conflict. 250 weapons of 100 kt explosive power. Maximum radiation anomaly: -57.8 W/m².',
+  47:  'India and Pakistan conflict. 500 weapons of 100 kt explosive power. Maximum radiation anomaly: -68.7 W/m².',
+  150: 'Russia and U.S. nuclear superpower conflict. 4400 weapons of 100 kt explosive power. Maximum radiation anomaly: -115.3 W/m².'
+};
+const CROP_COLORS = { wheat: '#FFB347', corn: '#77DD77', rice: '#AEC6CF', soy: '#F49AC2', grass: '#a0a8b0' };
+const CROP_LABELS = { wheat: 'Wheat', corn: 'Corn', rice: 'Rice', soy: 'Soy', grass: 'Pasture Grass' };
+
+// Default selected scenarios (all scenarios - full data coverage)
+const DEFAULT_SELECTED = [0, 5, 16, 27, 37, 47, 150];
+
+// ============================================================
+// CHART REGISTRY
+// ============================================================
+const charts = {};
+
+function destroyChart(id) {
+  if (charts[id]) {
+    charts[id].destroy();
+    delete charts[id];
+  }
+}
+
+// ============================================================
+// CHART OPTION HELPERS
+// ============================================================
+function makeLineOptions(yLabel, extraOpts) {
+  return Object.assign({
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } }
+    },
+    scales: {
+      x: { type: 'linear', grid: { color: '#21262d' }, ticks: { color: '#8b949e', font: { size: 10 } }, title: { display: true, text: 'Years after conflict', color: '#8b949e', font: { size: 10 } } },
+      y: { 
+        grid: { 
+          color: (context) => {
+            // Thicker and brighter line at y=0
+            if (context.tick.value === 0) {
+              return '#58a6ff';
+            }
+            return '#21262d';
+          },
+          lineWidth: (context) => {
+            // Thicker line at y=0
+            if (context.tick.value === 0) {
+              return 2;
+            }
+            return 1;
+          }
+        }, 
+        ticks: { color: '#8b949e', font: { size: 10 } }, 
+        title: { display: !!yLabel, text: yLabel || '', color: '#8b949e', font: { size: 10 } } 
+      }
+    }
+  }, extraOpts || {});
+}
+
+function makeBarOptions(yLabel, extraOpts) {
+  return Object.assign({
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } }
+    },
+    scales: {
+      x: { grid: { color: '#21262d' }, ticks: { color: '#8b949e', font: { size: 10 } } },
+      y: { grid: { color: '#21262d' }, ticks: { color: '#8b949e', font: { size: 10 } }, title: { display: !!yLabel, text: yLabel || '', color: '#8b949e', font: { size: 10 } } }
+    }
+  }, extraOpts || {});
+}
+
+// ============================================================
+// DATA HELPERS
+// ============================================================
+function getMaxYear(country, selectedScens) {
+  let max = 0;
+  selectedScens.forEach(s => {
+    const d = NWDC.temperature[country]?.[String(s)];
+    if (d) max = Math.max(max, ...Object.keys(d).map(Number));
+  });
+  return max || 20;
+}
+
+function precipPctChange(country, scen, yearRange) {
+  const base = NWDC.precipitation[country]?.[String(0)] || {};
+  const data = NWDC.precipitation[country]?.[String(scen)] || {};
+  return Object.keys(data).map(Number)
+    .filter(y => y >= yearRange[0] && y <= yearRange[1] && y > 0)
+    .map(y => {
+      const b = base[String(y)];
+      const v = data[String(y)];
+      return (b != null && b !== 0) ? { x: y, y: Math.round((v - b) / b * 1000) / 10 } : null;
+    }).filter(Boolean);
+}
+
+function getStarv(country, scen, trade, livestock, waste) {
+  return NWDC.starvation[country]?.[String(scen)]?.[trade]?.[livestock]?.[waste] || null;
+}
+
+function mostSevereScen(selectedScens) {
+  const nonZero = selectedScens.filter(s => s > 0);
+  return nonZero.length ? Math.max(...nonZero) : null;
+}
+
+function getYearRange(prefix) {
+  const s = parseInt(document.getElementById(prefix + '-year-start').value);
+  const e = parseInt(document.getElementById(prefix + '-year-end').value);
+  return [Math.min(s, e), Math.max(s, e)];
+}
+
+function getSelectedScens(prefix) {
+  const boxes = document.querySelectorAll('#' + prefix + '-scen-list input[type=checkbox]');
+  return Array.from(boxes).filter(b => b.checked).map(b => parseInt(b.value));
+}
+
+function getStarvControls(prefix) {
+  const trade = document.querySelector('input[name="' + prefix + '-trade"]:checked')?.value || 'trade';
+  const livestock = document.querySelector('input[name="' + prefix + '-livestock"]:checked')?.value || 'livestock';
+  const waste = document.querySelector('input[name="' + prefix + '-waste"]:checked')?.value || '0% reduction';
+  return { trade, livestock, waste };
+}
+
+function clampYearSliders(prefix, maxYear) {
+  const startEl = document.getElementById(prefix + '-year-start');
+  const endEl   = document.getElementById(prefix + '-year-end');
+  startEl.max = maxYear;
+  endEl.max   = maxYear;
+  if (parseInt(startEl.value) > maxYear) startEl.value = 0;
+  if (parseInt(endEl.value)   > maxYear) endEl.value   = maxYear;
+}
+
+function updateYearLabel(prefix) {
+  const [s, e] = getYearRange(prefix);
+  document.getElementById(prefix + '-year-label').textContent = s + '\u2013' + e;
+  document.getElementById(prefix + '-yr-start-val').textContent = s;
+  document.getElementById(prefix + '-yr-end-val').textContent   = e;
+}
+
+// ============================================================
+// COLOR HELPERS FOR STAT CARDS
+// ============================================================
+function tempCardClass(val) {
+  if (val < -5) return 'danger';
+  if (val < -2) return 'warn';
+  if (val < 0)  return 'neutral';
+  return 'safe';
+}
+function starvCardClass(pct) {
+  if (pct > 50) return 'danger';
+  if (pct > 20) return 'warn';
+  if (pct > 5)  return 'neutral';
+  return 'safe';
+}
+function setCardClass(id, cls) {
+  const el = document.getElementById(id);
+  el.classList.remove('danger','warn','safe','neutral');
+  el.classList.add(cls);
+}
+
+// ============================================================
+// INIT: BUILD SCENARIO LISTS
+// ============================================================
+function buildScenList(prefix) {
+  const container = document.getElementById(prefix + '-scen-list');
+  container.innerHTML = '';
+  SCENARIO_IDS.forEach(s => {
+    const row = document.createElement('label');
+    row.className = 'scen-item';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = s;
+    cb.checked = DEFAULT_SELECTED.includes(s);
+    cb.onchange = () => { if (prefix === 'p') { pOnChange(); } else { aOnChange(); } };
+    const dot = document.createElement('span');
+    dot.className = 'scen-dot';
+    dot.style.background = SCENARIO_COLORS[s];
+    const txt = document.createTextNode(SCENARIO_LABELS[s]);
+    row.appendChild(cb);
+    row.appendChild(dot);
+    row.appendChild(txt);
+    container.appendChild(row);
+  });
+}
+
+function pToggleAll() {
+  const boxes = document.querySelectorAll('#p-scen-list input[type=checkbox]');
+  const allChecked = Array.from(boxes).every(b => b.checked);
+  boxes.forEach(b => { b.checked = !allChecked; });
+  pOnChange();
+}
+function aToggleAll() {
+  const boxes = document.querySelectorAll('#a-scen-list input[type=checkbox]');
+  const allChecked = Array.from(boxes).every(b => b.checked);
+  boxes.forEach(b => { b.checked = !allChecked; });
+  aOnChange();
+}
+
+function buildCountrySelect(id) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = '';
+  NWDC.countries.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;          // must match the keys in NWDC.temperature, etc.
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+function buildScenDescList(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  SCENARIO_IDS.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'scenario-info';
+    div.style.borderLeftColor = SCENARIO_COLORS[s];
+    div.innerHTML = '<div class="scen-name">' + SCENARIO_LABELS[s] + '</div><div class="scen-desc">' + SCENARIO_DESC[s] + '</div>';
+    c.appendChild(div);
+  });
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tabl-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'policy')  renderPolicy();
+  if (name === 'analyst') renderAnalyst();
+}
+
+// ============================================================
+// COLLAPSIBLE
+// ============================================================
+function toggleCollapse(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+function toggleStarvControls(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ============================================================
+// POLICY TAB — EVENT HANDLERS
+// ============================================================
+function pOnChange() {
+  const country = document.getElementById('p-country').value;
+  const scens = getSelectedScens('p');
+  const maxY = getMaxYear(country, scens);
+  clampYearSliders('p', maxY);
+  updateYearLabel('p');
+  renderPolicy();
+}
+
+function pYearChange() {
+  const startEl = document.getElementById('p-year-start');
+  const endEl = document.getElementById('p-year-end');
+  const startVal = parseInt(startEl.value);
+  const endVal = parseInt(endEl.value);
+  
+  // Prevent start from exceeding end
+  if (startVal > endVal) {
+    startEl.value = endVal;
+  }
+  
+  updateYearLabel('p');
+  renderPolicy();
+}
+
+// ============================================================
+// POLICY RENDER
+// ============================================================
+function renderPolicy() {
+  const country = document.getElementById('p-country').value;
+  if (!country) return;
+  const selScens = getSelectedScens('p');
+  const [startY, endY] = getYearRange('p');
+  const { trade, livestock, waste } = getStarvControls('p');
+  const sev = mostSevereScen(selScens);
+
+  // ----- STAT CARDS -----
+  if (sev !== null) {
+    // Temp
+    const tempBase = NWDC.temperature[country]?.[String(0)] || {};
+    const tempSev  = NWDC.temperature[country]?.[String(sev)] || {};
+    const tempDiffs = [];
+    for (let y = startY; y <= endY; y++) {
+      const b = tempBase[String(y)], v = tempSev[String(y)];
+      if (b != null && v != null) tempDiffs.push(v - b);
+    }
+    if (tempDiffs.length) {
+      const avg = tempDiffs.reduce((a,x) => a+x, 0) / tempDiffs.length;
+      document.getElementById('p-stat-temp').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(2) + '\u00b0C';
+      document.getElementById('p-stat-temp').style.color = SCENARIO_COLORS[sev] || '#8b949e';
+      document.getElementById('p-stat-temp-label').textContent = 'Temp Change (' + sev + ' Tg, avg yrs ' + startY + '\u2013' + endY + ')';
+      setCardClass('p-stat-temp-card', tempCardClass(avg));
+    } else {
+      document.getElementById('p-stat-temp').textContent = 'N/A';
+    }
+
+    // Precip
+    const precipBase = NWDC.precipitation[country]?.[String(0)] || {};
+    const precipSev  = NWDC.precipitation[country]?.[String(sev)] || {};
+    const precipDiffs = [];
+    for (let y = startY; y <= endY; y++) {
+      if (y === 0) continue;
+      const b = precipBase[String(y)], v = precipSev[String(y)];
+      if (b != null && v != null && b !== 0) precipDiffs.push((v - b) / b * 100);
+    }
+    if (precipDiffs.length) {
+      const avg = precipDiffs.reduce((a,x) => a+x, 0) / precipDiffs.length;
+      document.getElementById('p-stat-precip').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(1) + '%';
+      document.getElementById('p-stat-precip').style.color = SCENARIO_COLORS[sev] || '#8b949e';
+      document.getElementById('p-stat-precip-label').textContent = 'Precip Change (' + sev + ' Tg, avg yrs ' + startY + '\u2013' + endY + ')';
+      setCardClass('p-stat-precip-card', tempCardClass(avg < 0 ? -Math.abs(avg)/20 : avg/20));
+    } else {
+      document.getElementById('p-stat-precip').textContent = 'N/A';
+    }
+
+    // Starvation
+    const stv = getStarv(country, sev, trade, livestock, waste);
+    if (stv) {
+      const pct = stv.pct;
+      const num = stv.num;
+      document.getElementById('p-stat-starvpct').textContent = pct.toFixed(1) + '%';
+      document.getElementById('p-stat-starvpct').style.color = SCENARIO_COLORS[sev] || '#8b949e';
+      document.getElementById('p-stat-starvpct-label').textContent = '% Starving (' + sev + ' Tg)';
+      setCardClass('p-stat-starvpct-card', starvCardClass(pct));
+      document.getElementById('p-stat-starvnum').textContent = num.toLocaleString();
+      document.getElementById('p-stat-starvnum-label').textContent = '# Starving (' + sev + ' Tg)';
+      setCardClass('p-stat-starvnum-card', starvCardClass(pct));
+    } else {
+      document.getElementById('p-stat-starvpct').textContent = 'N/A';
+      document.getElementById('p-stat-starvpct').style.color = SCENARIO_COLORS[sev] || '#8b949e';
+      document.getElementById('p-stat-starvnum').textContent = 'N/A';
+    }
+  }
+
+  // ----- TEMP CHART -----
+  {
+    destroyChart('p-temp');
+    const datasets = [];
+    // Always put scenario 0 first (behind)
+    const orderedScens = [
+      ...selScens.filter(s => s === 0),
+      ...selScens.filter(s => s !== 0)
+    ];
+    orderedScens.forEach(s => {
+      const tempData = NWDC.temperature[country]?.[String(s)] || {};
+      const pts = Object.keys(tempData).map(Number)
+        .filter(y => y >= startY && y <= endY)
+        .sort((a,b) => a-b)
+        .map(y => ({ x: y, y: tempData[String(y)] }));
+      datasets.push({
+        label: SCENARIO_SHORT_LABELS[s],
+        data: pts,
+        borderColor: s === 0 ? '#e0e8f0' : SCENARIO_COLORS[s],
+        backgroundColor: 'transparent',
+        borderWidth: s === 0 ? 1 : 2,
+        borderDash: s === 0 ? [3, 3] : [],
+        tension: 0.3,
+        pointRadius: 2
+      });
+    });
+    const ctx = document.getElementById('p-temp-chart').getContext('2d');
+    charts['p-temp'] = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: makeLineOptions('\u00b0C', { parsing: false })
+    });
+  }
+
+  // ----- PRECIP CHART -----
+  {
+    destroyChart('p-precip');
+    const datasets = [];
+    selScens.filter(s => s !== 0).forEach(s => {
+      const pts = precipPctChange(country, s, [startY, endY]);
+      datasets.push({
+        label: SCENARIO_SHORT_LABELS[s],
+        data: pts,
+        borderColor: SCENARIO_COLORS[s],
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 2
+      });
+    });
+    const ctx = document.getElementById('p-precip-chart').getContext('2d');
+    charts['p-precip'] = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: makeLineOptions('% change vs. baseline', { parsing: false })
+    });
+  }
+
+  // ----- STARVATION BAR -----
+  {
+    destroyChart('p-starv');
+    const nonZeroScens = selScens.filter(s => s !== 0);
+    const labels = nonZeroScens.map(s => SCENARIO_SHORT_LABELS[s]);
+    const vals = nonZeroScens.map(s => {
+      const sv = getStarv(country, s, trade, livestock, waste);
+      return sv ? sv.pct : null;
+    });
+    const rawNums = nonZeroScens.map(s => {
+      const sv = getStarv(country, s, trade, livestock, waste);
+      return sv ? sv.num : null;
+    });
+    // Reverse order so highest soot scenario is at bottom
+    const reversedLabels = [...labels].reverse();
+    const reversedVals = [...vals].reverse();
+    const reversedRawNums = [...rawNums].reverse();
+    const reversedScens = [...nonZeroScens].reverse();
+    const colors = reversedScens.map(s => SCENARIO_COLORS[s]);
+    
+    const ctx = document.getElementById('p-starv-chart').getContext('2d');
+    charts['p-starv'] = new Chart(ctx, {
+      type: 'bar',
+      data: { 
+        labels: reversedLabels, 
+        datasets: [
+          { 
+            label: '% Population Starving', 
+            data: reversedVals, 
+            backgroundColor: colors, 
+            borderWidth: 0,
+            xAxisID: 'x'
+          }
+        ] 
+      },
+      options: makeBarOptions('% starving', { 
+        indexAxis: 'y',
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const pct = context.parsed.x;
+                return 'Percent starving: ' + pct.toFixed(2) + '%';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { 
+            grid: { color: '#21262d' }, 
+            ticks: { color: '#8b949e', font: { size: 10 } }, 
+            title: { display: true, text: '% starving', color: '#8b949e', font: { size: 10 } },
+            position: 'top'
+          },
+          y: { 
+            grid: { color: '#21262d' }, 
+            ticks: { color: '#8b949e', font: { size: 10 } }
+          }
+        }
+      })
+    });
+    document.getElementById('p-starv-title').textContent = 'Population Starving (%) by Scenario [' + trade + ', ' + livestock + ', ' + waste + ']';
+  }
+
+  // ----- CROP BAR CHART -----
+  {
+    destroyChart('p-cropbar');
+    const nonZeroScens = selScens.filter(s => s !== 0);
+    const crops = ['wheat', 'corn', 'rice', 'soy', 'grass'];
+    const cropDatasets = crops.map(crop => {
+      const vals = nonZeroScens.map(s => {
+        const clmData = NWDC.agriculture_clm[country]?.[String(s)];
+        if (!clmData) return null;
+        const yrs = Object.keys(clmData).map(Number).filter(y => y >= startY && y <= endY && y >= 1 && y <= 10);
+        if (!yrs.length) return null;
+        const vals2 = yrs.map(y => clmData[String(y)]?.[crop]).filter(v => v != null);
+        return vals2.length ? vals2.reduce((a,x)=>a+x,0)/vals2.length : null;
+      });
+      return {
+        label: CROP_LABELS[crop],
+        data: vals,
+        backgroundColor: CROP_COLORS[crop],
+        borderWidth: 0
+      };
+    });
+    const ctx = document.getElementById('p-cropbar-chart').getContext('2d');
+    charts['p-cropbar'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: nonZeroScens.map(s => s + ' Tg'), datasets: cropDatasets },
+      options: makeBarOptions('% yield change')
+    });
+    document.getElementById('p-cropbar-title').textContent = 'Crop Yield Changes (avg yrs ' + Math.max(1, startY) + '\u2013' + Math.min(10, endY) + ')';
+  }
+
+  // ----- CROP LINE CHART -----
+  renderPolicyCropLine();
+
+  // ----- PRECIPITATION DISTRIBUTION -----
+  renderPolicyDistribution();
+}
+
+function renderPolicyCropLine() {
+  const country = document.getElementById('p-country').value;
+  if (!country) return;
+  const selScens = getSelectedScens('p');
+  const [startY, endY] = getYearRange('p');
+  const crop = document.getElementById('p-crop-select').value;
+
+  destroyChart('p-cropline');
+  const nonZeroScens = selScens.filter(s => s !== 0);
+  const datasets = nonZeroScens.map(s => {
+    const clmData = NWDC.agriculture_clm[country]?.[String(s)];
+    if (!clmData) return null;
+    const pts = Object.keys(clmData).map(Number)
+      .filter(y => y >= Math.max(1, startY) && y <= Math.min(10, endY))
+      .sort((a,b) => a-b)
+      .map(y => ({ x: y, y: clmData[String(y)]?.[crop] ?? null }))
+      .filter(p => p.y != null);
+    return pts.length ? {
+      label: SCENARIO_SHORT_LABELS[s],
+      data: pts,
+      borderColor: SCENARIO_COLORS[s],
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      pointRadius: 2
+    } : null;
+  }).filter(Boolean);
+
+  const ctx = document.getElementById('p-cropline-chart').getContext('2d');
+  charts['p-cropline'] = new Chart(ctx, {
+    type: 'line',
+    data: { datasets },
+    options: makeLineOptions('% yield change', { parsing: false })
+  });
+}
+
+// ============================================================
+// POLICY YEAR CHANGE
+// ============================================================
+function pYearChange2() {
+  updateYearLabel('p');
+  renderPolicy();
+}
+
+// ============================================================
+// PRECIPITATION DISTRIBUTION (Policy tab)
+// ============================================================
+// Average % precipitation change vs. 0 Tg baseline for one country.
+// Year 0 is skipped, matching the rest of the dashboard.
+function avgPrecipChange(country, scen, firstY, lastY) {
+  const base = NWDC.precipitation[country]?.['0'];
+  const data = NWDC.precipitation[country]?.[String(scen)];
+  if (!base || !data) return null;
+  const diffs = [];
+  for (let y = firstY; y <= lastY; y++) {
+    const b = base[String(y)], v = data[String(y)];
+    if (b != null && v != null && b !== 0) diffs.push((v - b) / b * 100);
+  }
+  return diffs.length ? diffs.reduce((a, x) => a + x, 0) / diffs.length : null;
+}
+
+// Draws the "no change" line and the selected-country line on top of the bars.
+const distMarkersPlugin = {
+  id: 'distMarkers',
+  afterDatasetsDraw(chart) {
+    const m = chart.options.plugins.distMarkers;
+    if (!m) return;
+    const { ctx, chartArea: a, scales: { x } } = chart;
+    ctx.save();
+    ctx.font = '600 13px "Segoe UI", system-ui, sans-serif';
+
+    // No-change line (0%)
+    const zx = x.getPixelForValue(0);
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = '#e6edf3';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(zx, a.top); ctx.lineTo(zx, a.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#e6edf3';
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = zx > (a.left + a.right) / 2 ? 'right' : 'left';
+    ctx.fillText('No change', zx + (ctx.textAlign === 'left' ? 6 : -6), a.bottom - 4);
+
+    // Selected-country line
+    if (m.selVal != null) {
+      const sx = x.getPixelForValue(Math.max(x.min, Math.min(x.max, m.selVal)));
+      ctx.strokeStyle = '#E69F00';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(sx, a.top - 6); ctx.lineTo(sx, a.bottom); ctx.stroke();
+
+      const text = m.selName + ': ' + (m.selVal >= 0 ? '+' : '\u2212') + Math.abs(m.selVal).toFixed(1) + '%';
+      const w = ctx.measureText(text).width;
+      const alignRight = sx + w + 12 > a.right;
+      const tx = alignRight ? sx - 8 : sx + 8;
+      ctx.textAlign = alignRight ? 'right' : 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = '#E69F00';
+      ctx.fillText(text, tx, a.top - 8);
+    }
+    ctx.restore();
+  }
+};
+
+function renderPolicyDistribution() {
+  const country = document.getElementById('p-country').value;
+  const selScens = getSelectedScens('p');
+  const [startY, endY] = getYearRange('p');
+  const sev = mostSevereScen(selScens);
+  const summaryEl = document.getElementById('p-dist-summary');
+  const noteEl = document.getElementById('p-dist-note');
+  const canvas = document.getElementById('p-dist-chart');
+  const firstY = Math.max(1, startY);   // year 0 is excluded
+
+  destroyChart('p-dist');
+
+  if (sev === null) {
+    summaryEl.textContent = 'Select at least one war scenario (above 0 Tg) to see this comparison.';
+    noteEl.textContent = '';
+    return;
+  }
+  if (endY < firstY) {
+    summaryEl.textContent = 'Choose an end year of 1 or later to see this comparison.';
+    noteEl.textContent = '';
+    return;
+  }
+
+  // One averaged value per country
+  const all = {};
+  NWDC.countries.forEach(c => {
+    const v = avgPrecipChange(c, sev, firstY, endY);
+    if (v !== null && isFinite(v)) all[c] = v;
+  });
+  const selVal = all[country] ?? null;
+  const others = Object.keys(all).filter(c => c !== country).map(c => all[c]);
+
+  document.getElementById('p-dist-title').textContent =
+    'How does ' + country + '\u2019s rainfall change compare with other countries?';
+
+  if (!others.length) {
+    summaryEl.textContent = 'There is not enough data to make this comparison.';
+    noteEl.textContent = '';
+    return;
+  }
+
+  // Fixed-width bins built from ALL countries, so they don't shift when you change country
+  const BIN = 5;
+  const allVals = Object.values(all);
+  let lo = Math.floor(Math.min(...allVals, 0) / BIN) * BIN;
+  let hi = Math.ceil(Math.max(...allVals, 0) / BIN) * BIN;
+  if (hi === lo) hi = lo + BIN;
+  const nBins = Math.round((hi - lo) / BIN);
+  const counts = new Array(nBins).fill(0);
+  others.forEach(v => {
+    const i = Math.min(nBins - 1, Math.max(0, Math.floor((v - lo) / BIN)));
+    counts[i]++;
+  });
+  const points = counts.map((n, i) => ({ x: lo + (i + 0.5) * BIN, y: n }));
+
+  // Plain-language summary
+  const yrsText = firstY === endY ? 'year ' + endY : 'years ' + firstY + '\u2013' + endY;
+  let summary;
+  if (selVal === null) {
+    summary = 'No precipitation data is available for ' + country + ' in this scenario.';
+  } else {
+    const drier = others.filter(v => v > selVal).length;
+    const wetter = others.filter(v => v < selVal).length;
+    const dir = selVal < 0 ? 'less' : 'more';
+    const amt = Math.abs(selVal).toFixed(1);
+    const rank = selVal < 0
+      ? 'drier than ' + Math.round(drier / others.length * 100) + '% of the other ' + others.length + ' countries'
+      : 'wetter than ' + Math.round(wetter / others.length * 100) + '% of the other ' + others.length + ' countries';
+    summary = 'In the ' + sev + ' Tg scenario (' + yrsText + ' after the conflict), ' + country +
+      ' would get about ' + amt + '% ' + dir + ' rain and snow than it would without a war. That is ' + rank + '.';
+  }
+  summaryEl.textContent = summary;
+  canvas.setAttribute('aria-label',
+    'Histogram showing how many countries fall into each range of precipitation change. ' + summary);
+
+  noteEl.textContent =
+    'Each country is averaged over ' + yrsText + ' and compared with a world without war. ' +
+    'Bars count the ' + others.length + ' other countries with data; every country counts equally, regardless of size or population. ' +
+    'Percent changes can look large in very dry places because their normal rainfall is small.';
+
+  const ctx = canvas.getContext('2d');
+  charts['p-dist'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      datasets: [{
+        label: 'Other countries',
+        data: points,
+        backgroundColor: '#56B4E9',
+        borderColor: '#0d1117',
+        borderWidth: 1,
+        barPercentage: 1,
+        categoryPercentage: 1
+      }]
+    },
+    plugins: [distMarkersPlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      layout: { padding: { top: 30 } },
+      plugins: {
+        legend: { display: false },
+        distMarkers: { selVal, selName: country },
+        tooltip: {
+          titleFont: { size: 14 }, bodyFont: { size: 14 },
+          callbacks: {
+            title: items => {
+              const c = items[0].raw.x;
+              const a = c - BIN / 2, b = c + BIN / 2;
+              const f = v => (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v) + '%';
+              return 'Rainfall change from ' + f(a) + ' to ' + f(b);
+            },
+            label: item => item.raw.y + (item.raw.y === 1 ? ' country' : ' countries')
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear', min: lo, max: hi,
+          grid: { color: '#21262d' },
+          ticks: {
+            stepSize: (hi - lo) > 80 ? 20 : 10,
+            color: '#c9d1d9', font: { size: 13 },
+            callback: v => v + '%'
+          },
+          title: { display: true, text: 'Change in rainfall and snowfall compared with a world without war (%)', color: '#c9d1d9', font: { size: 13 } }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#21262d' },
+          ticks: { precision: 0, color: '#c9d1d9', font: { size: 13 } },
+          title: { display: true, text: 'Number of countries', color: '#c9d1d9', font: { size: 13 } }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// ANALYST TAB — EVENT HANDLERS
+// ============================================================
+function aOnChange() {
+  const country = document.getElementById('a-country').value;
+  const scens = getSelectedScens('a');
+  const maxY = getMaxYear(country, scens);
+  clampYearSliders('a', maxY);
+  updateYearLabel('a');
+  renderAnalyst();
+}
+
+function aYearChange() {
+  const startEl = document.getElementById('a-year-start');
+  const endEl = document.getElementById('a-year-end');
+  const startVal = parseInt(startEl.value);
+  const endVal = parseInt(endEl.value);
+  
+  // Prevent start from exceeding end
+  if (startVal > endVal) {
+    startEl.value = endVal;
+  }
+  
+  updateYearLabel('a');
+  renderAnalyst();
+}
+
+// ============================================================
+// ANALYST RENDER
+// ============================================================
+function renderAnalyst() {
+  const country = document.getElementById('a-country').value;
+  if (!country) return;
+  const selScens = getSelectedScens('a');
+  const [startY, endY] = getYearRange('a');
+  const { trade, livestock, waste } = getStarvControls('a');
+
+  // ----- TEMP CHART -----
+  {
+    destroyChart('a-temp');
+    const orderedScens = [
+      ...selScens.filter(s => s === 0),
+      ...selScens.filter(s => s !== 0)
+    ];
+    const datasets = orderedScens.map(s => {
+      const tempData = NWDC.temperature[country]?.[String(s)] || {};
+      const pts = Object.keys(tempData).map(Number)
+        .filter(y => y >= startY && y <= endY)
+        .sort((a,b) => a-b)
+        .map(y => ({ x: y, y: tempData[String(y)] }));
+      return {
+        label: SCENARIO_SHORT_LABELS[s],
+        data: pts,
+        borderColor: s === 0 ? '#e0e8f0' : SCENARIO_COLORS[s],
+        backgroundColor: 'transparent',
+        borderWidth: s === 0 ? 1 : 2,
+        borderDash: s === 0 ? [3, 3] : [],
+        tension: 0.3,
+        pointRadius: 2
+      };
+    });
+    const ctx = document.getElementById('a-temp-chart').getContext('2d');
+    charts['a-temp'] = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: makeLineOptions('\u00b0C', { parsing: false })
+    });
+  }
+
+  // ----- PRECIP CHART -----
+  {
+    destroyChart('a-precip');
+    const datasets = selScens.filter(s => s !== 0).map(s => {
+      const pts = precipPctChange(country, s, [startY, endY]);
+      return {
+        label: SCENARIO_SHORT_LABELS[s],
+        data: pts,
+        borderColor: SCENARIO_COLORS[s],
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 2
+      };
+    });
+    const ctx = document.getElementById('a-precip-chart').getContext('2d');
+    charts['a-precip'] = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: makeLineOptions('% change vs. baseline', { parsing: false })
+    });
+  }
+
+  // ----- STARVATION BAR -----
+  {
+    destroyChart('a-starv');
+    const nonZeroScens = selScens.filter(s => s !== 0);
+    const labels = nonZeroScens.map(s => SCENARIO_LABELS[s]);
+    const vals = nonZeroScens.map(s => {
+      const sv = getStarv(country, s, trade, livestock, waste);
+      return sv ? sv.pct : null;
+    });
+    const colors = nonZeroScens.map(s => SCENARIO_COLORS[s]);
+    const ctx = document.getElementById('a-starv-chart').getContext('2d');
+    charts['a-starv'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: '% Population Starving', data: vals, backgroundColor: colors, borderWidth: 0 }] },
+      options: makeBarOptions('% starving', { plugins: { legend: { display: false } } })
+    });
+  }
+
+  // ----- CROP CHARTS (wheat, corn, rice, soy) -----
+  ['wheat','corn','rice','soy'].forEach(crop => {
+    const chartId = 'a-' + crop;
+    destroyChart(chartId);
+    const nonZeroScens = selScens.filter(s => s !== 0);
+    const datasets = nonZeroScens.map(s => {
+      const clmData = NWDC.agriculture_clm[country]?.[String(s)];
+      if (!clmData) return null;
+      const pts = Object.keys(clmData).map(Number)
+        .filter(y => y >= Math.max(1, startY) && y <= Math.min(10, endY))
+        .sort((a,b) => a-b)
+        .map(y => ({ x: y, y: clmData[String(y)]?.[crop] ?? null }))
+        .filter(p => p.y != null);
+      return pts.length ? {
+        label: SCENARIO_SHORT_LABELS[s],
+        data: pts,
+        borderColor: SCENARIO_COLORS[s],
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 2
+      } : null;
+    }).filter(Boolean);
+    const ctx = document.getElementById(chartId + '-chart').getContext('2d');
+    charts[chartId] = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: makeLineOptions('% yield change', { parsing: false })
+    });
+  });
+
+  // ----- STARVATION TABLE -----
+  {
+    const wrap = document.getElementById('a-starv-table-wrap');
+    const nonZeroScens = selScens.filter(s => s !== 0);
+    if (!nonZeroScens.length) { wrap.innerHTML = '<p style="color:var(--text2);font-size:12px">No scenarios selected.</p>'; return; }
+    const tradeOpts = ['trade', 'no trade'];
+    const liveOpts  = ['livestock', 'partial livestock', 'no livestock'];
+    const wasteOpts = ['0% reduction', '50% reduction', '100% reduction'];
+    let html = '<table><thead><tr><th>Scenario</th><th>Trade</th><th>Livestock</th><th>Waste Red.</th><th>% Starving</th><th># Starving</th></tr></thead><tbody>';
+    nonZeroScens.forEach(s => {
+      tradeOpts.forEach(tr => {
+        liveOpts.forEach(lv => {
+          wasteOpts.forEach(wa => {
+            const sv = getStarv(country, s, tr, lv, wa);
+            if (!sv) return;
+            const pct = sv.pct;
+            const num = sv.num;
+            const cls = pct > 50 ? 'color:var(--red)' : pct > 20 ? 'color:var(--yellow)' : pct > 5 ? 'color:var(--blue)' : 'color:var(--green)';
+            html += '<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + SCENARIO_COLORS[s] + ';margin-right:6px"></span>' + s + ' Tg</td>';
+            html += '<td>' + tr + '</td><td>' + lv + '</td><td>' + wa + '</td>';
+            html += '<td style="' + cls + '">' + pct.toFixed(1) + '%</td>';
+            html += '<td>' + num.toLocaleString() + '</td></tr>';
+          });
+        });
+      });
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+}
+
+// ============================================================
+// ABOUT TAB
+// ============================================================
+function buildAboutScenList() {
+  const c = document.getElementById('about-scen-list');
+  if (!c) return;
+  c.innerHTML = '';
+  SCENARIO_IDS.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'scenario-info';
+    div.style.borderLeftColor = SCENARIO_COLORS[s];
+    div.innerHTML = '<div class="scen-name">' + SCENARIO_LABELS[s] + '</div><div class="scen-desc">' + SCENARIO_DESC[s] + '</div>';
+    c.appendChild(div);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+  buildScenList('p');
+  buildScenList('a');
+  buildCountrySelect('p-country');
+  buildCountrySelect('a-country');
+  buildScenDescList('p-scen-desc-list');
+  buildScenDescList('a-scen-desc-list');
+  buildAboutScenList();
+  updateYearLabel('p');
+  updateYearLabel('a');
+  renderPolicy();
+})();
+</script>
+</body>
+</html>
