@@ -1,0 +1,131 @@
+---
+title: "R_Notebook_Sci_Comp26"
+output: pdf_document
+---
+
+```{r}
+library(terra)
+library(bDSSDMTools)
+library(ggplot2)
+library(sf)
+```
+
+```{r}
+# Load a vector defining global landmass
+landmass <- vect("C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Landmass/landmass.shp")
+
+#plot
+plot(landmass, col="#D4D4D4", border = "#D4D4D4", axes = TRUE)
+```
+```{r}
+# Let's look at the file first!
+readLines("C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Seagrass/species_presence_absence_records.csv", n=3)
+records <- read.csv("C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Seagrass/species_presence_absence_records.csv", sep = ";")
+
+# Tranform data frame into a spatial object
+records <- vect(records, geom = c("Lon", "Lat"))
+
+# Plot Record
+plot(landmass, main = "Species distribution records", col = "#D4D4D4", border = "#D4D4D4", axes = TRUE)
+plot(records, y="PA", col = c("#c29431", "#043259"), pch = 16, cex = 0.5, add = TRUE)
+```
+```{r}
+# Get important environmental layers
+files <- c("C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic DissolvedMolecularOxygen Mean.tif", # Oxygen
+"C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic OceanTemperature LtMax.tif", # Temperature Max
+"C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic OceanTemperature LtMin.tif", # Temperature Min
+"C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic pH Mean.tif", # pH
+"C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic TotalPrimaryProductionPhyto Mean.tif", # Productivity
+"C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Present Benthic Salinity Mean.tif"
+)
+
+environmentalLayers <- rast(files)
+plot(environmentalLayers)
+```
+
+```{r}
+# develop a study region
+myStudyRegion <- studyRegion(rasterLayers=environmentalLayers,
+presences=records, # presence records
+distanceThreshold=200000, # distance from records in meters
+bathymetryLayer = "C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Bathymetry.tif", # bathymetry layer
+depthPref=c(0,-500), # known vertical distribution
+intertidalLayer = "C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/CoastLine.tif" ) # consider intertidal region
+
+plot(myStudyRegion, main="Study region", col="#979797", axes=TRUE)
+```
+```{r}
+environmentalLayers <- crop(environmentalLayers, myStudyRegion)
+environmentalLayers <- mask(environmentalLayers, myStudyRegion)
+plot(environmentalLayers, axes = TRUE)
+```
+```{r}
+modelData <- generateModelData(records, envConditions = environmentalLayers)
+model <- trainModel(modelData, algorithm = "brt")
+prediction <- predictModel(model = model, newData = environmentalLayers)
+plot(prediction$rasterLayer, main = "Predicted species distribution", col = rev(topo.colors(100)))
+```
+
+```{r}
+presences <- read.csv("C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Corals/occurrenceRecords.csv")
+
+presences <- vect(presences, geom = c("Lon", "Lat"))
+
+plot(landmass, main = "Coral Species Records", col = "#D4D4D4", border = "#D4D4D4", axes = TRUE)
+plot(presences, y="speciesName", col = c("#034B03"), pch = 16, cex = 0.5, add = TRUE)
+```
+
+```{r}
+# Plot in study region
+ct_extent <- ext(-100, -55, 0, 32)
+presences_ct <- crop(presences, ct_extent)
+
+plot(landmass, main = "Coral Species Records", col = "#D4D4D4", border = "#D4D4D4", axes = TRUE)
+plot(presences_ct, col = "#034B03", pch = 16, cex = 0.4, add = TRUE)
+```
+```{r}
+# Develop study region area
+myStudyRegion2 <- studyRegion(rasterLayers = environmentalLayers,
+                             presences = presences_ct,
+                             distanceThreshold = 200000,
+                             bathymetryLayer = "C:/Users/mmaes/OneDrive/Desktop/OCS7001_SciComp/Sci_Comp26/Sci_Comp26/Data/Raster_data/Bathymetry.tif",
+                             depthPref = c(0, -60))
+plot(myStudyRegion2, main = "Study Region", col="#979797", axes = TRUE)
+```
+```{r}
+environmentalLayers <- crop(environmentalLayers, myStudyRegion2)
+environmentalLayers <- mask(environmentalLayers, myStudyRegion2)
+plot(environmentalLayers, axes = TRUE)
+```
+```{r}
+absences <- pseudoAbsences(rasterLayers = environmentalLayers, presences = presences_ct, n = 2000)
+landmassCT <- crop(landmass, myStudyRegion2)
+
+plot(landmassCT, main = "Coral Triangle Species Records", col = "#D4D4D4", border = "#D4D4D4", axes = TRUE)
+plot(absences, col="#c29431", pch=16, cex=0.5, add=TRUE)
+plot(presences_ct, col="#043259", pch=16, cex=0.5, add=TRUE)
+```
+```{r}
+#combine presences and absences into a unique object for modeling
+presences_ct$PA <- 1
+absences$PA <- 0
+records <- rbind(presences_ct, absences)
+
+# plot records
+plot(landmassCT, main = "Coral Reefs Species Records", col = "#D4D4D4", border = "#D4D4D4", axes = TRUE)
+plot(records, y = "PA", col=c("#c29431", "#043259"), pch=16, cex=0.5, add=TRUE)
+```
+```{r}
+modelData <- generateModelData(records, envConditions = environmentalLayers, method = "blocks", kFolds = 10)
+modelData$plotDatasets
+```
+```{r}
+# fit a BRT model to the dataset
+model <- trainModel(modelData, algorithm= "brt")
+
+# predict the distribution with the model over a raster stack
+prediction <- predictModel(model = model, newData = environmentalLayers)
+
+# map the predicted distribution
+plot(prediction$rasterLayer, main = "Predicted Species Distribution", col = rev(topo.colors(100)))
+```
